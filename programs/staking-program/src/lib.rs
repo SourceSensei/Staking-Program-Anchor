@@ -20,11 +20,29 @@ pub mod staking_program {
         Ok(())
     }
 
-    pub fn destake(ctx: Context<Initialize>, amount: u64) -> Result<()> {
+    pub fn destake(ctx: Context<Initialize>) -> Result<()> {
         Ok(())
     }
 }
 
 
 #[derive(Accounts)]
-pub struct Initialize {}
+pub struct Initialize<'info> {
+
+    #[account(mut)]
+    pub signer: Signer<'info>,
+
+    #[account(
+        init_if_needed,
+        seeds = [constants::VAULT_SEED],
+        bump,
+        payer = signer,
+        token::mint = mint,
+        token::authority = token_vault_account,
+    )]
+    pub token_vault_account: Account<'info, TokenAccount>,
+
+    pub mint: Account<'info, Mint>,
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
