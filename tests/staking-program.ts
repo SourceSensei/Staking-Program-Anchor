@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { StakingProgram } from "../target/types/staking_program";
-import { Connection, Keypair } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { createMint } from "@solana/spl-token";
 import { min } from "bn.js";
 
@@ -43,9 +43,21 @@ describe("staking-program", () => {
   const program = anchor.workspace.StakingProgram as Program<StakingProgram>;
 
   it("Is initialized!", async () => {
-   // await createMintToken();
+    // await createMintToken();
 
-    const tx = await program.methods.initialize().rpc();
+    //Use PDA
+    let [vaultAccount] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault")],
+      program.programId
+    );
+
+    const tx = await program.methods.initialize()
+      .accounts({
+        signer: payer.publicKey,
+        tokenVaultAccount: vaultAccount,
+        mint: mintKeypair.publicKey
+      })
+      .rpc();
     console.log("Your transaction signature", tx);
   });
 });
